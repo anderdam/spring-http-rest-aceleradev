@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/challenge/")
+@RequestMapping("challenge")
 public class ChallengeController {
 
     private final ChallengeService challengeService;
@@ -21,11 +21,10 @@ public class ChallengeController {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(path = {"{accelerationId}", "{userId}"})
-    public ResponseEntity<List<Challenge>> findByAccelerationIdAndUserId(@PathVariable(value = "accelerationId") Long accelerationId,
-                                                                         @PathVariable(value = "userId") Long userId){
-        return !challengeService.findByAccelerationIdAndUserId(accelerationId, userId).isEmpty() ?
-                ResponseEntity.ok(challengeService.findByAccelerationIdAndUserId(accelerationId, userId))
-                : ResponseEntity.notFound().build();
+    @GetMapping
+    public ResponseEntity<List<Challenge>> findByAccelerationIdAndUserId(@RequestParam(value = "accelerationId") Long accelerationId,
+                                                                         @RequestParam(value = "userId") Long userId){
+        List<Challenge> challenges = challengeService.findByAccelerationIdAndUserId(accelerationId, userId);
+        return !challenges.isEmpty() ? ResponseEntity.ok(challenges) : ResponseEntity.notFound().build();
     }
 }

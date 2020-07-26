@@ -12,7 +12,7 @@ import java.util.Optional;
 
 
 @RestController
-@RequestMapping("/user/")
+@RequestMapping("user")
 public class UserController {
 
 
@@ -24,34 +24,27 @@ public class UserController {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(path = "{userId}")
-    public ResponseEntity<Optional<User>> findById(@PathVariable(value = "userId") Long id) {
-        ResponseEntity<Optional<User>> result;
-        if (userService.findById(id).isPresent()) {
-            result = ResponseEntity.ok(userService.findById(id));
+    @GetMapping("/{userId}")
+    public ResponseEntity<Optional<User>> findById(@PathVariable(value = "userId") Long userId) {
+        Optional<User> user = userService.findById(userId);
+        return user.isPresent() ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
+    }
 
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping
+    public ResponseEntity<List<User>> findByAccelerationNameOrCompanyId(@RequestParam(required = false) String accelerationName,
+                                                                        @RequestParam(required = false) Long companyId) {
+        List<User> users = null;
+
+        if (accelerationName == null || companyId != null) {
+            if (accelerationName == null && companyId != null) {
+                users = userService.findByCompanyId(companyId);
+            }
         } else {
-            result = ResponseEntity.notFound().build();
+            users = userService.findByAccelerationName(accelerationName);
         }
-        return result;
-    }
 
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping(path = "/accelerationName")
-    public ResponseEntity<List<User>> findByAccelerationName(String name){
-        if (userService.findByAccelerationName(name).isEmpty()){
-            return ResponseEntity.ok(userService.findByAccelerationName(name));
-        }
-        return ResponseEntity.notFound().build();
+        assert users != null;
+        return ResponseEntity.ok(users);
     }
-
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping(path = "/companyId")
-    public ResponseEntity<List<User>> findByCompanyId(Long companyId){
-        if (userService.findByCompanyId(companyId).isEmpty()){
-            return ResponseEntity.ok(userService.findByCompanyId(companyId));
-        }
-        return ResponseEntity.notFound().build();
-    }
-
 }

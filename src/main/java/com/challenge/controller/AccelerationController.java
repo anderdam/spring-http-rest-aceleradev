@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/acceleration/")
+@RequestMapping("/acceleration")
 public class AccelerationController {
 
     private final AccelerationService accelerationService;
@@ -22,18 +22,16 @@ public class AccelerationController {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(path = "{accelerationId}")
-    public ResponseEntity<Optional<Acceleration>> findById(@PathVariable(value = "accelerationId") Long id){
-        return accelerationService.findById(id).isPresent() ?
-                ResponseEntity.ok(accelerationService.findById(id))
-                : ResponseEntity.notFound().build();
+    @GetMapping("/{accelerationId}")
+    public ResponseEntity<Acceleration> findById(@PathVariable(value = "accelerationId") Long accelerationId){
+        Optional<Acceleration> acceleration = accelerationService.findById(accelerationId);
+        return acceleration.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(path = "{companyId}")
-    public ResponseEntity<List<Acceleration>> findByCompanyId(@PathVariable(value = "companyId") Long companyId){
-        return accelerationService.findByCompanyId(companyId).isEmpty() ?
-                ResponseEntity.ok(accelerationService.findByCompanyId(companyId))
-                : ResponseEntity.notFound().build();
+    @GetMapping
+    public ResponseEntity<List<Acceleration>> findByCompanyId(@RequestParam Long companyId) {
+        List<Acceleration> accelerations = accelerationService.findByCompanyId(companyId);
+        return !accelerations.isEmpty() ? ResponseEntity.ok(accelerations) : ResponseEntity.notFound().build();
     }
 }
